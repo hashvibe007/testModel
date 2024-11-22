@@ -39,29 +39,42 @@ const TrainingHistory = ({ history, onSetDefault }) => {
 
   const handleSetDefault = async (entry) => {
     try {
-      // Transform the architecture to the correct format
-      const architectureToSave = entry.architecture.map(layer => ({
-        type: layer.type,
-        params: layer.params
-      }));
+      // Create the configuration object
+      const configToSave = {
+        network_architecture: entry.architecture,
+        training_config: {
+          optimizer: entry.optimizer,
+          learning_rate: entry.learning_rate,
+          epochs: entry.epochs,
+          batch_size: entry.batch_size,  // Include batch size
+          augmentation: entry.augmentation || {
+            enabled: false,
+            rotation: 0,
+            zoom: 0,
+            width_shift: 0,
+            height_shift: 0,
+            horizontal_flip: false
+          }
+        }
+      };
       
-      const architectureString = JSON.stringify(architectureToSave);
+      console.log('Setting default configuration:', configToSave);
+      const configString = JSON.stringify(configToSave);
       
       // Save to localStorage
-      localStorage.setItem('defaultArchitecture', architectureString);
-      setSelectedDefault(architectureString);
+      localStorage.setItem('defaultArchitecture', configString);
+      setSelectedDefault(configString);
       
       // Save to backend
-      await setDefaultArchitecture(architectureToSave);
+      await setDefaultArchitecture(configToSave);
       
       if (onSetDefault) {
-        onSetDefault(entry.architecture);
+        onSetDefault(configToSave.network_architecture);
       }
 
-      console.log('Successfully set default architecture:', architectureToSave);
+      console.log('Successfully set default configuration:', configToSave);
     } catch (error) {
-      console.error('Failed to set default architecture:', error);
-      // You might want to show an error message to the user here
+      console.error('Failed to set default configuration:', error);
     }
   };
 
@@ -138,6 +151,13 @@ const TrainingHistory = ({ history, onSetDefault }) => {
                 size="small"
                 icon={<AccessTime />}
                 label={`${entry.epochs} epochs`}
+                color="primary"
+                variant="outlined"
+              />
+              <Chip
+                size="small"
+                icon={<Speed />}
+                label={`Batch: ${entry.batch_size}`}  // Show actual batch size
                 color="primary"
                 variant="outlined"
               />

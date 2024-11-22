@@ -20,7 +20,7 @@
     {
       "type": "Convolution 2D",
       "params": {
-        "filters": 64,
+        "filters": 32,
         "kernelSize": 3,
         "stride": 1,
         "padding": 1,
@@ -52,5 +52,19 @@
         "activation": "softmax"
       }
     }
-  ]
+  ],
+  "training_config": {
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "batch_size": 32,
+    "augmentation": {
+      "enabled": false,
+      "rotation": 15,
+      "zoom": 0.1,
+      "width_shift": 0.1,
+      "height_shift": 0.1,
+      "horizontal_flip": false
+    }
+  }
 }

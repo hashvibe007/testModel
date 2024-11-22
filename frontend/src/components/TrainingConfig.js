@@ -19,6 +19,7 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
   const [optimizer, setOptimizer] = useState('adam');
   const [learningRate, setLearningRate] = useState(0.001);
   const [epochs, setEpochs] = useState(10);
+  const [batchSize, setBatchSize] = useState(100);
   const [error, setError] = useState(null);
   const [augmentationConfig, setAugmentationConfig] = useState({
     enabled: false,
@@ -77,6 +78,7 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
         optimizer,
         learning_rate: learningRate,
         epochs,
+        batch_size: batchSize,
         augmentation: augmentationConfig
       };
 
@@ -143,6 +145,17 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
           onChange={(e) => setEpochs(parseInt(e.target.value))}
           sx={{ mb: 2 }}
           inputProps={{ min: 1 }}
+        />
+
+        <TextField
+          fullWidth
+          label="Batch Size"
+          type="number"
+          value={batchSize}
+          onChange={(e) => setBatchSize(parseInt(e.target.value))}
+          sx={{ mb: 2 }}
+          inputProps={{ min: 1 }}
+          helperText="Default: 100"
         />
 
         <Button

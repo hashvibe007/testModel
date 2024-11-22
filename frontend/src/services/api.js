@@ -65,21 +65,16 @@ export const getTrainingHistory = async () => {
   }
 };
 
-export const setDefaultArchitecture = async (architecture) => {
+export const setDefaultArchitecture = async (config) => {
   try {
-    const formattedArchitecture = architecture.map(layer => ({
-      type: layer.type,
-      params: { ...layer.params }
-    }));
-
-    console.log('Sending architecture to backend:', formattedArchitecture);
+    console.log('Sending configuration to backend:', config);
 
     const response = await fetch(`${API_BASE_URL}/set-default-architecture`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(formattedArchitecture),
+      body: JSON.stringify(config),
     });
     
     if (!response.ok) {

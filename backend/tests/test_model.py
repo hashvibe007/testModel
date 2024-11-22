@@ -46,7 +46,7 @@ def format_architecture(architecture):
     ])
 
 def load_default_architecture():
-    """Load the default architecture from localStorage or fallback to best known architecture"""
+    """Load the default architecture and training config"""
     try:
         if not os.path.exists(DEFAULT_ARCHITECTURE_FILE):
             raise FileNotFoundError(
@@ -55,27 +55,28 @@ def load_default_architecture():
 
         with open(DEFAULT_ARCHITECTURE_FILE, "r") as f:
             data = json.load(f)
-            if "network_architecture" not in data:
-                raise ValueError("Invalid architecture file format")
-            architecture = [
-                LayerConfig(**layer) for layer in data["network_architecture"]
-            ]
+            if "network_architecture" not in data or "training_config" not in data:
+                raise ValueError("Invalid configuration format")
+            
+            architecture = [LayerConfig(**layer) for layer in data["network_architecture"]]
+            training_config = data["training_config"]
 
-            logger.info("\nTesting with architecture:")
-            logger.info(format_architecture(architecture))
+            logger.info("\nTesting with configuration:")
+            logger.info(f"Architecture:\n{format_architecture(architecture)}")
+            logger.info(f"Training Config: {training_config}")
 
-            return architecture
+            return architecture, training_config
     except (FileNotFoundError, json.JSONDecodeError, ValueError) as e:
         raise Exception(
-            f"Error loading default architecture: {str(e)}\n"
-            "Please set a default architecture from the frontend application "
+            f"Error loading default configuration: {str(e)}\n"
+            "Please set a default configuration from the frontend application "
             "first by clicking 'Set Default' on your best performing model."
         )
 
 def test_model_creation():
     """Test if model can be created from default architecture"""
     logger.info("\n=== Testing Model Creation ===")
-    architecture = load_default_architecture()
+    architecture, training_config = load_default_architecture()
     model = create_dynamic_model(architecture)
     logger.info(f"Model created: {model}")
     batch_size = 64
@@ -88,27 +89,25 @@ def test_model_creation():
 def test_high_training_accuracy():
     """Test if model achieves >95% training accuracy"""
     logger.info("\n=== Testing Training Accuracy ===")
-    architecture = load_default_architecture()
+    architecture, training_config = load_default_architecture()
 
-    # Add augmentation config
-    augmentation_config = AugmentationConfig(
-        enabled=False,
-        rotation=0,
-        zoom=0,
-        width_shift=0,
-        height_shift=0,
-        horizontal_flip=False
-    )
-
-    training_config = NetworkConfig(
+    config = NetworkConfig(
         network_architecture=architecture,
-        optimizer="adam",
-        learning_rate=0.01,
-        epochs=1,
-        augmentation=augmentation_config
+        optimizer=training_config["optimizer"],
+        learning_rate=training_config["learning_rate"],
+        epochs=training_config["epochs"],
+        batch_size=training_config["batch_size"],
+        augmentation=AugmentationConfig(
+            enabled=False,
+            rotation=0,
+            zoom=0,
+            width_shift=0,
+            height_shift=0,
+            horizontal_flip=False
+        )
     )
 
-    response = client.post("/train", json=training_config.dict())
+    response = client.post("/train", json=config.dict())
     assert response.status_code == 200
 
     results = response.json()
@@ -120,7 +119,7 @@ def test_high_training_accuracy():
 def test_high_testing_accuracy():
     """Test if model achieves >95% testing accuracy"""
     logger.info("\n=== Testing Model Accuracy ===")
-    architecture = load_default_architecture()
+    architecture, training_config = load_default_architecture()
 
     # Add augmentation config
     augmentation_config = AugmentationConfig(
@@ -134,9 +133,10 @@ def test_high_testing_accuracy():
 
     training_config = NetworkConfig(
         network_architecture=architecture,
-        optimizer="adam",
-        learning_rate=0.01,
-        epochs=1,
+        optimizer=training_config["optimizer"],
+        learning_rate=training_config["learning_rate"],
+        epochs=training_config["epochs"],
+        batch_size=training_config["batch_size"],
         augmentation=augmentation_config
     )
 
@@ -152,7 +152,7 @@ def test_high_testing_accuracy():
 def test_single_epoch_performance():
     """Test if model achieves required accuracy in single epoch"""
     logger.info("\n=== Testing Single Epoch Performance ===")
-    architecture = load_default_architecture()
+    architecture, training_config = load_default_architecture()
 
     # Add augmentation config
     augmentation_config = AugmentationConfig(
@@ -166,9 +166,10 @@ def test_single_epoch_performance():
 
     training_config = NetworkConfig(
         network_architecture=architecture,
-        optimizer="adam",
-        learning_rate=0.01,
-        epochs=1,
+        optimizer=training_config["optimizer"],
+        learning_rate=training_config["learning_rate"],
+        epochs=training_config["epochs"],
+        batch_size=training_config["batch_size"],
         augmentation=augmentation_config
     )
 
@@ -189,7 +190,7 @@ def test_single_epoch_performance():
 def test_model_params():
     """Test if model has less than 25000 parameters"""
     logger.info("\n=== Testing Model Parameters ===")
-    architecture = load_default_architecture()
+    architecture, training_config = load_default_architecture()
     model = create_dynamic_model(architecture)
     total_params = sum(p.numel() for p in model.parameters())
 
@@ -199,7 +200,7 @@ def test_model_params():
 def test_model_efficiency():
     """Comprehensive test for model efficiency"""
     logger.info("\n=== Testing Overall Model Efficiency ===")
-    architecture = load_default_architecture()
+    architecture, training_config = load_default_architecture()
     model = create_dynamic_model(architecture)
     total_params = sum(p.numel() for p in model.parameters())
 
@@ -215,9 +216,10 @@ def test_model_efficiency():
 
     training_config = NetworkConfig(
         network_architecture=architecture,
-        optimizer="adam",
-        learning_rate=0.01,
-        epochs=1,
+        optimizer=training_config["optimizer"],
+        learning_rate=training_config["learning_rate"],
+        epochs=training_config["epochs"],
+        batch_size=training_config["batch_size"],
         augmentation=augmentation_config
     )
 

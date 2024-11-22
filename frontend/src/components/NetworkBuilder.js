@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Box } from '@mui/material';
 import LayerCard from './LayerCard';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const calculateLayerDimensions = (layers) => {
   let dimensions = [];
@@ -94,6 +95,22 @@ const NetworkBuilder = ({ layers, onLayerUpdate, onLayerDelete }) => {
     setTotalParams(dimensions.reduce((sum, dim) => sum + dim.params, 0));
   }, [layers]);
 
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const reorderedLayers = Array.from(layers);
+    const [reorderedItem] = reorderedLayers.splice(result.source.index, 1);
+    reorderedLayers.splice(result.destination.index, 0, reorderedItem);
+
+    // Update parent component's state
+    const newLayers = reorderedLayers.map((layer, index) => ({
+      ...layer,
+      id: `${layer.id.split('-')[0]}-${Date.now()}-${index}`
+    }));
+    
+    onLayerUpdate(newLayers);
+  };
+
   return (
     <Paper sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -104,22 +121,55 @@ const NetworkBuilder = ({ layers, onLayerUpdate, onLayerDelete }) => {
           Total Parameters: {totalParams.toLocaleString()}
         </Typography>
       </Box>
-      <Box sx={{ minHeight: 200, p: 2, backgroundColor: '#f8f8f8' }}>
-        {layers.map((layer, index) => (
-          <LayerCard
-            key={layer.id}
-            layer={layer}
-            onDelete={() => onLayerDelete(index)}
-            onUpdate={(params) => onLayerUpdate(index, params)}
-            dimensions={layerDimensions[index]}
-          />
-        ))}
-        {layers.length === 0 && (
-          <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
-            Drag and drop layers here to build your network
-          </Typography>
-        )}
-      </Box>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="network-layers-list">
+          {(provided) => (
+            <Box
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              sx={{ minHeight: 200, p: 2, backgroundColor: '#f8f8f8', borderRadius: 1 }}
+            >
+              {layers.map((layer, index) => (
+                <Draggable 
+                  key={layer.id} 
+                  draggableId={layer.id} 
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        marginBottom: '8px'
+                      }}
+                    >
+                      <div {...provided.dragHandleProps}>
+                        <LayerCard
+                          layer={layer}
+                          onDelete={() => onLayerDelete(index)}
+                          onUpdate={(params) => {
+                            const newLayers = [...layers];
+                            newLayers[index] = { ...layer, defaultParams: params };
+                            onLayerUpdate(newLayers);
+                          }}
+                          dimensions={layerDimensions[index]}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+              {layers.length === 0 && (
+                <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
+                  Drag and drop layers here to build your network
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Paper>
   );
 };

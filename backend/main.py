@@ -54,6 +54,7 @@ class NetworkConfig(BaseModel):
     optimizer: str
     learning_rate: float
     epochs: int
+    batch_size: int = 100
     augmentation: AugmentationConfig
 
 class TrainingResult(BaseModel):
@@ -212,9 +213,9 @@ def test_epoch(model, test_loader, criterion):
         logger.error(traceback.format_exc())
         raise
 
-def load_data():
+def load_data(batch_size: int = 100):
     try:
-        logger.info("Loading MNIST dataset...")
+        logger.info(f"Loading MNIST dataset with batch size {batch_size}...")
         transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
@@ -223,7 +224,7 @@ def load_data():
         train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
         test_dataset = datasets.MNIST('./data', train=False, transform=transform)
         
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1000, shuffle=True)
         
         logger.info("Dataset loaded successfully")
@@ -248,7 +249,7 @@ async def train_model(config: NetworkConfig):
             logger.info(f"Height shift: ±{config.augmentation.height_shift}")
             logger.info(f"Horizontal flip: {config.augmentation.horizontal_flip}")
         
-        train_loader, test_loader = load_data()
+        train_loader, test_loader = load_data(config.batch_size)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"Using device: {device}")
         
@@ -287,7 +288,7 @@ async def train_model(config: NetworkConfig):
         
         end_time = datetime.now()
         
-        # Create new history entry with augmentation info
+        # Create new history entry with augmentation info and batch size
         new_entry = {
             "timestamp": start_time.isoformat(),
             "training_end_time": end_time.isoformat(),
@@ -300,12 +301,13 @@ async def train_model(config: NetworkConfig):
             "optimizer": config.optimizer,
             "learning_rate": config.learning_rate,
             "epochs": config.epochs,
+            "batch_size": config.batch_size,  # Add batch size to history entry
             "total_params": total_params,
             "final_train_accuracy": train_acc,
             "final_test_accuracy": test_acc,
             "training_results": results,
             "training_time": (end_time - start_time).total_seconds(),
-            "augmentation": config.augmentation.dict() if config.augmentation else None  # Add augmentation info
+            "augmentation": config.augmentation.dict() if config.augmentation else None
         }
         
         # Load existing history or create new
@@ -524,10 +526,18 @@ async def get_training_history():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/set-default-architecture")
-async def set_default_architecture(architecture: List[LayerConfig]):
+async def set_default_architecture(config: dict):
     try:
         logger.info(f"Current working directory: {os.getcwd()}")
         logger.info(f"Attempting to save to: {DEFAULT_ARCHITECTURE_FILE}")
+        
+        # Validate the config structure
+        if 'network_architecture' not in config or 'training_config' not in config:
+            raise ValueError("Invalid configuration format. Must include 'network_architecture' and 'training_config'")
+        
+        if 'batch_size' not in config['training_config']:
+            logger.warning("Batch size not found in config, using default value of 100")
+            config['training_config']['batch_size'] = 100
         
         # Create tests directory if it doesn't exist
         tests_dir = os.path.dirname(DEFAULT_ARCHITECTURE_FILE)
@@ -536,16 +546,9 @@ async def set_default_architecture(architecture: List[LayerConfig]):
         
         # Use absolute path for file operations
         with open(DEFAULT_ARCHITECTURE_FILE, 'w') as f:
-            content = {
-                "network_architecture": [
-                    {
-                        "type": layer.type,
-                        "params": layer.params
-                    } for layer in architecture
-                ]
-            }
-            json.dump(content, f, indent=2)
+            json.dump(config, f, indent=2)
             logger.info(f"Successfully wrote content to file")
+            logger.info(f"Saved configuration: {json.dumps(config, indent=2)}")
             
         # Verify the file was written
         if os.path.exists(DEFAULT_ARCHITECTURE_FILE):
@@ -553,9 +556,9 @@ async def set_default_architecture(architecture: List[LayerConfig]):
                 saved_content = json.load(f)
             logger.info(f"Verified saved content: {saved_content}")
             
-        return {"message": "Default architecture saved successfully"}
+        return {"message": "Default configuration saved successfully"}
     except Exception as e:
-        logger.error(f"Error saving default architecture: {str(e)}")
+        logger.error(f"Error saving default configuration: {str(e)}")
         logger.error(f"Attempted to save to: {DEFAULT_ARCHITECTURE_FILE}")
         logger.error(f"Current working directory: {os.getcwd()}")
         logger.error(traceback.format_exc())

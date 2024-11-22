@@ -114,10 +114,16 @@ function App() {
     e.preventDefault();
   };
 
-  const handleLayerUpdate = (index, params) => {
-    const newLayers = [...layers];
-    newLayers[index] = { ...newLayers[index], defaultParams: params };
-    setLayers(newLayers);
+  const handleLayerUpdate = (indexOrNewLayers, params) => {
+    if (Array.isArray(indexOrNewLayers)) {
+      // Handle reordering
+      setLayers(indexOrNewLayers);
+    } else {
+      // Handle parameter updates
+      const newLayers = [...layers];
+      newLayers[indexOrNewLayers] = { ...newLayers[indexOrNewLayers], defaultParams: params };
+      setLayers(newLayers);
+    }
   };
 
   const handleLayerDelete = (index) => {
