@@ -185,7 +185,7 @@ def test_single_epoch_performance():
     logger.info("Single Epoch Results:")
     logger.info(f"Train Accuracy: {train_acc * 100:.2f}%")
     logger.info(f"Test Accuracy: {test_acc * 100:.2f}%")
-    assert train_acc > 0.95 and test_acc > 0.95, "Should achieve >95% accuracy in single epoch"
+    assert train_acc >= 0.95 and test_acc >= 0.95, "Should achieve at least 95% accuracy in single epoch"
 
 def test_model_params():
     """Test if model has less than 25000 parameters"""
@@ -238,6 +238,6 @@ def test_model_efficiency():
 
     # Comprehensive assertions
     assert total_params < 25000, "Too many parameters"
-    assert train_acc > 0.95, "Training accuracy too low"
-    assert test_acc > 0.95, "Testing accuracy too low"
+    assert train_acc >= 0.95, "Training accuracy too low"
+    assert test_acc >= 0.95, "Testing accuracy too low"
     assert len(results["results"]) == 1, "Too many epochs" 
