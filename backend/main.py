@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
+import torchvision.transforms.functional as TF
 import numpy as np
 import logging
 import traceback
@@ -13,6 +14,10 @@ import json
 from datetime import datetime
 import os
 from models.mnist_model import MNISTNet
+from PIL import Image
+import io
+import base64
+import random
 
 # Configure logging
 logging.basicConfig(
@@ -36,11 +41,20 @@ class LayerConfig(BaseModel):
     type: str
     params: Dict[str, Union[int, float, str]]
 
+class AugmentationConfig(BaseModel):
+    enabled: bool
+    rotation: float
+    zoom: float
+    width_shift: float
+    height_shift: float
+    horizontal_flip: bool
+
 class NetworkConfig(BaseModel):
     network_architecture: List[LayerConfig]
     optimizer: str
     learning_rate: float
     epochs: int
+    augmentation: AugmentationConfig
 
 class TrainingResult(BaseModel):
     epoch: int
@@ -97,7 +111,39 @@ def create_model(conv_layers):
         logger.error(traceback.format_exc())
         raise
 
-def train_epoch(model, train_loader, optimizer, criterion):
+def apply_augmentation(image, config):
+    """Apply augmentation to a single image"""
+    try:
+        img_pil = TF.to_pil_image(image)
+        
+        if config.rotation > 0:
+            angle = random.uniform(-config.rotation, config.rotation)
+            img_pil = TF.rotate(img_pil, angle)
+        
+        if config.zoom > 0:
+            scale = 1.0 + random.uniform(0, config.zoom)
+            new_size = [int(dim * scale) for dim in img_pil.size]
+            img_pil = TF.resize(img_pil, new_size)
+            # Crop back to original size
+            i = (img_pil.size[0] - 28) // 2
+            j = (img_pil.size[1] - 28) // 2
+            img_pil = TF.crop(img_pil, j, i, 28, 28)
+        
+        if config.width_shift > 0 or config.height_shift > 0:
+            width_shift = int(28 * random.uniform(-config.width_shift, config.width_shift))
+            height_shift = int(28 * random.uniform(-config.height_shift, config.height_shift))
+            img_pil = TF.affine(img_pil, 0, [width_shift, height_shift], 1, 0)
+        
+        if config.horizontal_flip and random.random() > 0.5:
+            img_pil = TF.hflip(img_pil)
+        
+        # Convert back to tensor
+        return TF.to_tensor(img_pil)
+    except Exception as e:
+        logger.error(f"Error in augmentation: {str(e)}")
+        return image
+
+def train_epoch(model, train_loader, optimizer, criterion, augmentation_config=None):
     try:
         model.train()
         total_loss = 0
@@ -108,6 +154,14 @@ def train_epoch(model, train_loader, optimizer, criterion):
         
         for batch_idx, (data, target) in enumerate(train_loader):
             try:
+                # Apply augmentation if enabled
+                if augmentation_config and augmentation_config.enabled:
+                    augmented_data = torch.stack([
+                        apply_augmentation(img, augmentation_config) 
+                        for img in data
+                    ])
+                    data = augmented_data
+
                 data, target = data.to(device), target.to(device)
                 optimizer.zero_grad()
                 output = model(data)
@@ -184,6 +238,16 @@ async def train_model(config: NetworkConfig):
     try:
         start_time = datetime.now()
         logger.info(f"Starting training with config: {config}")
+        
+        # Log augmentation settings if enabled
+        if config.augmentation and config.augmentation.enabled:
+            logger.info("Data augmentation enabled with settings:")
+            logger.info(f"Rotation: ±{config.augmentation.rotation}°")
+            logger.info(f"Zoom: {config.augmentation.zoom}")
+            logger.info(f"Width shift: ±{config.augmentation.width_shift}")
+            logger.info(f"Height shift: ±{config.augmentation.height_shift}")
+            logger.info(f"Horizontal flip: {config.augmentation.horizontal_flip}")
+        
         train_loader, test_loader = load_data()
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"Using device: {device}")
@@ -201,7 +265,13 @@ async def train_model(config: NetworkConfig):
         results = []
         
         for epoch in range(config.epochs):
-            train_acc, train_loss = train_epoch(model, train_loader, optimizer, criterion)
+            train_acc, train_loss = train_epoch(
+                model, 
+                train_loader, 
+                optimizer, 
+                criterion, 
+                config.augmentation
+            )
             test_acc, test_loss = test_epoch(model, test_loader, criterion)
             
             epoch_result = {
@@ -217,7 +287,7 @@ async def train_model(config: NetworkConfig):
         
         end_time = datetime.now()
         
-        # Create new history entry
+        # Create new history entry with augmentation info
         new_entry = {
             "timestamp": start_time.isoformat(),
             "training_end_time": end_time.isoformat(),
@@ -234,7 +304,8 @@ async def train_model(config: NetworkConfig):
             "final_train_accuracy": train_acc,
             "final_test_accuracy": test_acc,
             "training_results": results,
-            "training_time": (end_time - start_time).total_seconds()
+            "training_time": (end_time - start_time).total_seconds(),
+            "augmentation": config.augmentation.dict() if config.augmentation else None  # Add augmentation info
         }
         
         # Load existing history or create new
@@ -514,3 +585,59 @@ def ensure_valid_history_file():
 @app.on_event("startup")
 async def startup_event():
     ensure_valid_history_file()
+
+@app.post("/augmented-samples")
+async def get_augmented_samples(config: dict):
+    try:
+        # Load a few sample images from MNIST
+        train_loader, _ = load_data()
+        samples = []
+        for data, _ in train_loader:
+            if len(samples) < 6:  # Get 6 samples
+                samples.append(data[0])
+            else:
+                break
+
+        augmented_images = []
+        for img in samples:
+            # Convert to PIL Image
+            img_pil = TF.to_pil_image(img)
+            
+            # Apply augmentations based on config
+            if config['enabled']:
+                # Rotation
+                if config['rotation'] > 0:
+                    angle = random.uniform(-config['rotation'], config['rotation'])
+                    img_pil = TF.rotate(img_pil, angle)
+                
+                # Zoom (scale)
+                if config['zoom'] > 0:
+                    scale = 1.0 + random.uniform(0, config['zoom'])
+                    new_size = [int(dim * scale) for dim in img_pil.size]
+                    img_pil = TF.resize(img_pil, new_size)
+                    # Crop back to original size
+                    i = (img_pil.size[0] - 28) // 2
+                    j = (img_pil.size[1] - 28) // 2
+                    img_pil = TF.crop(img_pil, j, i, 28, 28)
+                
+                # Shifts
+                if config['width_shift'] > 0 or config['height_shift'] > 0:
+                    width_shift = int(28 * random.uniform(-config['width_shift'], config['width_shift']))
+                    height_shift = int(28 * random.uniform(-config['height_shift'], config['height_shift']))
+                    img_pil = TF.affine(img_pil, 0, [width_shift, height_shift], 1, 0)
+                
+                # Horizontal flip
+                if config['horizontal_flip'] and random.random() > 0.5:
+                    img_pil = TF.hflip(img_pil)
+
+            # Convert to base64
+            buffered = io.BytesIO()
+            img_pil.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            augmented_images.append(img_str)
+
+        return {"images": augmented_images}
+    except Exception as e:
+        logger.error(f"Error generating augmented samples: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))

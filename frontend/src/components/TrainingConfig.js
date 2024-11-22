@@ -9,15 +9,25 @@ import {
   InputLabel,
   Box,
   Typography,
-  Alert
+  Alert,
+  Divider
 } from '@mui/material';
 import { trainModel } from '../services/api';
+import ImageAugmentationConfig from './ImageAugmentationConfig';
 
 const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTraining, onTrainingComplete }) => {
   const [optimizer, setOptimizer] = useState('adam');
   const [learningRate, setLearningRate] = useState(0.001);
   const [epochs, setEpochs] = useState(10);
   const [error, setError] = useState(null);
+  const [augmentationConfig, setAugmentationConfig] = useState({
+    enabled: false,
+    rotation: 15,
+    zoom: 0.1,
+    width_shift: 0.1,
+    height_shift: 0.1,
+    horizontal_flip: false
+  });
 
   const validateNetwork = () => {
     if (networkLayers.length === 0) {
@@ -66,7 +76,8 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
         })),
         optimizer,
         learning_rate: learningRate,
-        epochs
+        epochs,
+        augmentation: augmentationConfig
       };
 
       const data = await trainModel(config);
@@ -83,65 +94,67 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
     }
   };
 
-  // Clear error when parameters change
-  const handleParameterChange = (paramSetter) => (event) => {
-    setError(null);
-    paramSetter(event.target.value);
-  };
-
   return (
-    <Paper sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Training Configuration
-      </Typography>
+    <>
+      <ImageAugmentationConfig
+        enabled={augmentationConfig.enabled}
+        config={augmentationConfig}
+        onChange={setAugmentationConfig}
+      />
       
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Training Configuration
+        </Typography>
+        
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Optimizer</InputLabel>
-        <Select
-          value={optimizer}
-          onChange={handleParameterChange(setOptimizer)}
-          label="Optimizer"
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Optimizer</InputLabel>
+          <Select
+            value={optimizer}
+            onChange={(e) => setOptimizer(e.target.value)}
+            label="Optimizer"
+          >
+            <MenuItem value="adam">Adam</MenuItem>
+            <MenuItem value="sgd">SGD</MenuItem>
+          </Select>
+        </FormControl>
+
+        <TextField
+          fullWidth
+          label="Learning Rate"
+          type="number"
+          value={learningRate}
+          onChange={(e) => setLearningRate(parseFloat(e.target.value))}
+          sx={{ mb: 2 }}
+          inputProps={{ min: 0.0001, step: 0.0001 }}
+        />
+
+        <TextField
+          fullWidth
+          label="Epochs"
+          type="number"
+          value={epochs}
+          onChange={(e) => setEpochs(parseInt(e.target.value))}
+          sx={{ mb: 2 }}
+          inputProps={{ min: 1 }}
+        />
+
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={isTraining || networkLayers.length === 0}
+          fullWidth
         >
-          <MenuItem value="adam">Adam</MenuItem>
-          <MenuItem value="sgd">SGD</MenuItem>
-        </Select>
-      </FormControl>
-
-      <TextField
-        fullWidth
-        label="Learning Rate"
-        type="number"
-        value={learningRate}
-        onChange={handleParameterChange((value) => setLearningRate(parseFloat(value)))}
-        sx={{ mb: 2 }}
-        inputProps={{ min: 0.0001, step: 0.0001 }}
-      />
-
-      <TextField
-        fullWidth
-        label="Epochs"
-        type="number"
-        value={epochs}
-        onChange={handleParameterChange((value) => setEpochs(parseInt(value)))}
-        sx={{ mb: 2 }}
-        inputProps={{ min: 1 }}
-      />
-
-      <Button
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={isTraining || networkLayers.length === 0}  // Only disable during training or when no layers
-        fullWidth
-      >
-        {isTraining ? 'Training...' : 'Start Training'}
-      </Button>
-    </Paper>
+          {isTraining ? 'Training...' : 'Start Training'}
+        </Button>
+      </Paper>
+    </>
   );
 };
 

@@ -6,6 +6,7 @@ import TrainingConfig from './components/TrainingConfig';
 import TrainingResults from './components/TrainingResults';
 import TrainingHistory from './components/TrainingHistory';
 import { getTrainingHistory } from './services/api';
+import DataSourceSelector from './components/DataSourceSelector';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [trainingResults, setTrainingResults] = useState([]);
   const [isTraining, setIsTraining] = useState(false);
   const [trainingHistory, setTrainingHistory] = useState([]);
+  const [dataSource, setDataSource] = useState('mnist');
 
   const loadTrainingHistory = async () => {
     try {
@@ -169,12 +171,22 @@ function App() {
     }
   };
 
+  const handleDataSourceChange = (newSource) => {
+    setDataSource(newSource);
+    setLayers([]);
+    setTrainingResults([]);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
-        <h1>MNIST Training Dashboard</h1>
+        <h1>Neural Network Training Dashboard</h1>
         <Grid container spacing={2}>
           <Grid item xs={12} md={8}>
+            <DataSourceSelector 
+              selectedSource={dataSource}
+              onSourceChange={handleDataSourceChange}
+            />
             <LayerPalette />
             <Box
               onDrop={handleDrop}
@@ -191,6 +203,7 @@ function App() {
                 layers={layers}
                 onLayerUpdate={handleLayerUpdate}
                 onLayerDelete={handleLayerDelete}
+                dataSource={dataSource}
               />
             </Box>
             <TrainingConfig 
@@ -199,6 +212,7 @@ function App() {
               isTraining={isTraining}
               setIsTraining={setIsTraining}
               onTrainingComplete={loadTrainingHistory}
+              dataSource={dataSource}
             />
             <TrainingResults results={trainingResults} />
           </Grid>

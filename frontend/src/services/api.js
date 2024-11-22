@@ -92,4 +92,26 @@ export const setDefaultArchitecture = async (architecture) => {
     console.error('Error setting default architecture:', error);
     throw error;
   }
+};
+
+export const getAugmentedImages = async (config) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/augmented-samples`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get augmented images');
+    }
+
+    const data = await response.json();
+    return data.images;
+  } catch (error) {
+    console.error('Error getting augmented images:', error);
+    throw error;
+  }
 }; 

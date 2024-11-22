@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Paper, Typography, Box, Card, CardContent, Chip, Stack, Button } from '@mui/material';
-import { AccessTime, Speed, Settings, Star } from '@mui/icons-material';
+import { Paper, Typography, Box, Card, Chip, Stack, Button } from '@mui/material';
+import { AccessTime, Speed, Settings, Star, Transform } from '@mui/icons-material';
 import { setDefaultArchitecture } from '../services/api';
 
 const formatArchitecture = (architecture) => {
@@ -69,8 +69,21 @@ const TrainingHistory = ({ history, onSetDefault }) => {
   const sortedHistory = [...history].sort((a, b) => {
     const dateA = new Date(a.timestamp);
     const dateB = new Date(b.timestamp);
-    return dateB - dateA;  // For descending order
+    return dateB - dateA;
   });
+
+  const formatAugmentationInfo = (augmentation) => {
+    if (!augmentation || !augmentation.enabled) return null;
+    
+    const settings = [];
+    if (augmentation.rotation > 0) settings.push(`Rot:±${augmentation.rotation}°`);
+    if (augmentation.zoom > 0) settings.push(`Zoom:${augmentation.zoom}`);
+    if (augmentation.width_shift > 0) settings.push(`W-Shift:${augmentation.width_shift}`);
+    if (augmentation.height_shift > 0) settings.push(`H-Shift:${augmentation.height_shift}`);
+    if (augmentation.horizontal_flip) settings.push('H-Flip');
+    
+    return settings.join(', ');
+  };
 
   return (
     <Paper sx={{ p: 2, maxHeight: '80vh', overflow: 'auto' }}>
@@ -79,6 +92,8 @@ const TrainingHistory = ({ history, onSetDefault }) => {
       </Typography>
       {sortedHistory.map((entry, index) => {
         const isDefault = selectedDefault === JSON.stringify(entry.architecture);
+        const augmentationInfo = formatAugmentationInfo(entry.augmentation);
+        
         return (
           <Card key={entry.timestamp} sx={{ mb: 2, p: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -126,6 +141,16 @@ const TrainingHistory = ({ history, onSetDefault }) => {
                 color="primary"
                 variant="outlined"
               />
+              {augmentationInfo && (
+                <Chip
+                  size="small"
+                  icon={<Transform />}
+                  label="Augmented"
+                  color="secondary"
+                  variant="outlined"
+                  title={augmentationInfo}
+                />
+              )}
             </Stack>
 
             <Typography 
@@ -139,6 +164,11 @@ const TrainingHistory = ({ history, onSetDefault }) => {
               }}
             >
               {formatArchitecture(entry.architecture)}
+              {augmentationInfo && (
+                <Box component="span" sx={{ ml: 1, color: 'secondary.main' }}>
+                  ({augmentationInfo})
+                </Box>
+              )}
             </Typography>
 
             <Box sx={{ 
@@ -164,7 +194,7 @@ const TrainingHistory = ({ history, onSetDefault }) => {
               )}
             </Box>
           </Card>
-        )
+        );
       })}
       {history.length === 0 && (
         <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
