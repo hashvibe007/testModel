@@ -13,6 +13,7 @@ from main import (
     create_dynamic_model,
     LayerConfig,
     NetworkConfig,
+    AugmentationConfig,
     DEFAULT_ARCHITECTURE_FILE,
     logger as main_logger
 )
@@ -89,11 +90,22 @@ def test_high_training_accuracy():
     logger.info("\n=== Testing Training Accuracy ===")
     architecture = load_default_architecture()
 
+    # Add augmentation config
+    augmentation_config = AugmentationConfig(
+        enabled=False,
+        rotation=0,
+        zoom=0,
+        width_shift=0,
+        height_shift=0,
+        horizontal_flip=False
+    )
+
     training_config = NetworkConfig(
         network_architecture=architecture,
         optimizer="adam",
         learning_rate=0.01,
-        epochs=1
+        epochs=1,
+        augmentation=augmentation_config
     )
 
     response = client.post("/train", json=training_config.dict())
@@ -109,12 +121,23 @@ def test_high_testing_accuracy():
     """Test if model achieves >95% testing accuracy"""
     logger.info("\n=== Testing Model Accuracy ===")
     architecture = load_default_architecture()
-    logger.info(f"Architecture: {architecture}")
+
+    # Add augmentation config
+    augmentation_config = AugmentationConfig(
+        enabled=False,
+        rotation=0,
+        zoom=0,
+        width_shift=0,
+        height_shift=0,
+        horizontal_flip=False
+    )
+
     training_config = NetworkConfig(
         network_architecture=architecture,
         optimizer="adam",
         learning_rate=0.01,
-        epochs=1
+        epochs=1,
+        augmentation=augmentation_config
     )
 
     response = client.post("/train", json=training_config.dict())
@@ -131,11 +154,22 @@ def test_single_epoch_performance():
     logger.info("\n=== Testing Single Epoch Performance ===")
     architecture = load_default_architecture()
 
+    # Add augmentation config
+    augmentation_config = AugmentationConfig(
+        enabled=False,
+        rotation=0,
+        zoom=0,
+        width_shift=0,
+        height_shift=0,
+        horizontal_flip=False
+    )
+
     training_config = NetworkConfig(
         network_architecture=architecture,
         optimizer="adam",
         learning_rate=0.01,
-        epochs=1
+        epochs=1,
+        augmentation=augmentation_config
     )
 
     response = client.post("/train", json=training_config.dict())
@@ -169,11 +203,22 @@ def test_model_efficiency():
     model = create_dynamic_model(architecture)
     total_params = sum(p.numel() for p in model.parameters())
 
+    # Add augmentation config
+    augmentation_config = AugmentationConfig(
+        enabled=False,
+        rotation=0,
+        zoom=0,
+        width_shift=0,
+        height_shift=0,
+        horizontal_flip=False
+    )
+
     training_config = NetworkConfig(
         network_architecture=architecture,
         optimizer="adam",
         learning_rate=0.01,
-        epochs=1
+        epochs=1,
+        augmentation=augmentation_config
     )
 
     response = client.post("/train", json=training_config.dict())
