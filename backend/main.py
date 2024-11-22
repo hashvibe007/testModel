@@ -217,9 +217,8 @@ async def train_model(config: NetworkConfig):
         
         end_time = datetime.now()
         
-        # Save to history
-        history = load_training_history()
-        history.append({
+        # Create new history entry
+        new_entry = {
             "timestamp": start_time.isoformat(),
             "training_end_time": end_time.isoformat(),
             "architecture": [
@@ -236,8 +235,32 @@ async def train_model(config: NetworkConfig):
             "final_test_accuracy": test_acc,
             "training_results": results,
             "training_time": (end_time - start_time).total_seconds()
-        })
-        save_training_history(history)
+        }
+        
+        # Load existing history or create new
+        try:
+            if os.path.exists(HISTORY_FILE):
+                with open(HISTORY_FILE, 'r') as f:
+                    history = json.load(f)
+            else:
+                history = []
+        except json.JSONDecodeError:
+            history = []
+        
+        # Add new entry
+        history.append(new_entry)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
+        
+        # Save updated history
+        try:
+            with open(HISTORY_FILE, 'w') as f:
+                json.dump(history, f, indent=2)
+            logger.info(f"Successfully saved training history to {HISTORY_FILE}")
+        except Exception as e:
+            logger.error(f"Error saving history: {e}")
+            logger.error(traceback.format_exc())
         
         return {
             "results": results,
@@ -466,3 +489,28 @@ async def set_default_architecture(architecture: List[LayerConfig]):
         logger.error(f"Current working directory: {os.getcwd()}")
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
+
+def ensure_valid_history_file():
+    """Ensure the history file exists and is valid JSON"""
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                try:
+                    json.load(f)
+                except json.JSONDecodeError:
+                    # If file is corrupted, create new
+                    with open(HISTORY_FILE, 'w') as f:
+                        json.dump([], f)
+        else:
+            # Create new file if doesn't exist
+            os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
+            with open(HISTORY_FILE, 'w') as f:
+                json.dump([], f)
+    except Exception as e:
+        logger.error(f"Error ensuring valid history file: {e}")
+        logger.error(traceback.format_exc())
+
+# Call this when the app starts
+@app.on_event("startup")
+async def startup_event():
+    ensure_valid_history_file()
