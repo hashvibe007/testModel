@@ -112,22 +112,28 @@ const NetworkBuilder = ({ layers, onLayerUpdate, onLayerDelete }) => {
   };
 
   return (
-    <Paper sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6">
-          Network Architecture
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Total Parameters: {totalParams.toLocaleString()}
-        </Typography>
-      </Box>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="network-layers-list">
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Paper sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">
+            Network Architecture
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Total Parameters: {totalParams.toLocaleString()}
+          </Typography>
+        </Box>
+        <Droppable droppableId="droppable-layers">
           {(provided) => (
             <Box
-              ref={provided.innerRef}
               {...provided.droppableProps}
-              sx={{ minHeight: 200, p: 2, backgroundColor: '#f8f8f8', borderRadius: 1 }}
+              ref={provided.innerRef}
+              sx={{ 
+                minHeight: 200, 
+                p: 2, 
+                backgroundColor: '#f8f8f8', 
+                borderRadius: 1,
+                transition: 'background-color 0.2s ease'
+              }}
             >
               {layers.map((layer, index) => (
                 <Draggable 
@@ -139,23 +145,23 @@ const NetworkBuilder = ({ layers, onLayerUpdate, onLayerDelete }) => {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      {...provided.dragHandleProps}
                       style={{
                         ...provided.draggableProps.style,
-                        marginBottom: '8px'
+                        marginBottom: '8px',
+                        opacity: snapshot.isDragging ? 0.8 : 1
                       }}
                     >
-                      <div {...provided.dragHandleProps}>
-                        <LayerCard
-                          layer={layer}
-                          onDelete={() => onLayerDelete(index)}
-                          onUpdate={(params) => {
-                            const newLayers = [...layers];
-                            newLayers[index] = { ...layer, defaultParams: params };
-                            onLayerUpdate(newLayers);
-                          }}
-                          dimensions={layerDimensions[index]}
-                        />
-                      </div>
+                      <LayerCard
+                        layer={layer}
+                        onDelete={() => onLayerDelete(index)}
+                        onUpdate={(params) => {
+                          const newLayers = [...layers];
+                          newLayers[index] = { ...layer, defaultParams: params };
+                          onLayerUpdate(newLayers);
+                        }}
+                        dimensions={layerDimensions[index]}
+                      />
                     </div>
                   )}
                 </Draggable>
@@ -169,8 +175,8 @@ const NetworkBuilder = ({ layers, onLayerUpdate, onLayerDelete }) => {
             </Box>
           )}
         </Droppable>
-      </DragDropContext>
-    </Paper>
+      </Paper>
+    </DragDropContext>
   );
 };
 

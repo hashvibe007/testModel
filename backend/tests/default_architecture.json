@@ -57,7 +57,7 @@
     "optimizer": "adam",
     "learning_rate": 0.01,
     "epochs": 1,
-    "batch_size": 32,
+    "batch_size": 75,
     "augmentation": {
       "enabled": false,
       "rotation": 15,
