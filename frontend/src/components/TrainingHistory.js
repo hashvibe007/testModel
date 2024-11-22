@@ -65,8 +65,12 @@ const TrainingHistory = ({ history, onSetDefault }) => {
     }
   };
 
-  // Sort history by test accuracy to easily identify the best model
-  const sortedHistory = [...history].sort((a, b) => b.final_test_accuracy - a.final_test_accuracy);
+  // Sort history by timestamp in descending order (latest first)
+  const sortedHistory = [...history].sort((a, b) => {
+    const dateA = new Date(a.timestamp);
+    const dateB = new Date(b.timestamp);
+    return dateB - dateA;  // For descending order
+  });
 
   return (
     <Paper sx={{ p: 2, maxHeight: '80vh', overflow: 'auto' }}>
@@ -79,7 +83,7 @@ const TrainingHistory = ({ history, onSetDefault }) => {
           <Card key={entry.timestamp} sx={{ mb: 2, p: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle2" gutterBottom>
-                Model #{history.length - index} - {new Date(entry.timestamp).toLocaleString()}
+                Model #{sortedHistory.length - index} - {new Date(entry.timestamp).toLocaleString()}
               </Typography>
               <Button
                 startIcon={<Star />}
