@@ -1,0 +1,56 @@
+{
+  "network_architecture": [
+    {
+      "type": "Convolution 2D",
+      "params": {
+        "filters": 8,
+        "kernelSize": 3,
+        "stride": 1,
+        "padding": 1,
+        "activation": "relu"
+      }
+    },
+    {
+      "type": "Max Pooling",
+      "params": {
+        "poolSize": 2,
+        "stride": 2
+      }
+    },
+    {
+      "type": "Convolution 2D",
+      "params": {
+        "filters": 24,
+        "kernelSize": 3,
+        "stride": 1,
+        "padding": 1,
+        "activation": "relu"
+      }
+    },
+    {
+      "type": "Max Pooling",
+      "params": {
+        "poolSize": 2,
+        "stride": 2
+      }
+    },
+    {
+      "type": "Max Pooling",
+      "params": {
+        "poolSize": 2,
+        "stride": 2
+      }
+    },
+    {
+      "type": "Flatten",
+      "params": {}
+    },
+    {
+      "type": "Fully Connected",
+      "params": {
+        "units": 10,
+        "activation": "softmax"
+      }
+    }
+  ]
+}
