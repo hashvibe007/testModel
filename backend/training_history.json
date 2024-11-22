@@ -12600,5 +12600,826 @@
       }
     ],
     "training_time": 11.709011
+  },
+  {
+    "timestamp": "2024-11-22T14:45:55.989769",
+    "training_end_time": "2024-11-22T14:46:05.130524",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 8,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 48,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7914,
+    "final_train_accuracy": 0.9530166666666666,
+    "final_test_accuracy": 0.9762,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9530166666666666,
+        "test_accuracy": 0.9762,
+        "train_loss": 0.14836348164111757,
+        "test_loss": 0.06903417818248272
+      }
+    ],
+    "training_time": 9.140755
+  },
+  {
+    "timestamp": "2024-11-22T14:46:05.166613",
+    "training_end_time": "2024-11-22T14:46:14.384911",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 8,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 48,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7914,
+    "final_train_accuracy": 0.9539333333333333,
+    "final_test_accuracy": 0.9761,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9539333333333333,
+        "test_accuracy": 0.9761,
+        "train_loss": 0.1481257743427534,
+        "test_loss": 0.07278964668512344
+      }
+    ],
+    "training_time": 9.218298
+  },
+  {
+    "timestamp": "2024-11-22T14:46:14.416813",
+    "training_end_time": "2024-11-22T14:46:23.747976",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 8,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 48,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7914,
+    "final_train_accuracy": 0.9480333333333333,
+    "final_test_accuracy": 0.9746,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9480333333333333,
+        "test_accuracy": 0.9746,
+        "train_loss": 0.17042212776873492,
+        "test_loss": 0.07688900418579578
+      }
+    ],
+    "training_time": 9.331163
+  },
+  {
+    "timestamp": "2024-11-22T14:46:23.797129",
+    "training_end_time": "2024-11-22T14:46:32.937276",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 8,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 48,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7914,
+    "final_train_accuracy": 0.9552166666666667,
+    "final_test_accuracy": 0.9803,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9552166666666667,
+        "test_accuracy": 0.9803,
+        "train_loss": 0.1421170625833175,
+        "test_loss": 0.06232430599629879
+      }
+    ],
+    "training_time": 9.140147
+  },
+  {
+    "timestamp": "2024-11-22T14:49:26.657113",
+    "training_end_time": "2024-11-22T14:49:36.081929",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 16,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 32,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7690,
+    "final_train_accuracy": 0.95725,
+    "final_test_accuracy": 0.9834,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.95725,
+        "test_accuracy": 0.9834,
+        "train_loss": 0.1349007462745588,
+        "test_loss": 0.05521488599479198
+      }
+    ],
+    "training_time": 9.424816
+  },
+  {
+    "timestamp": "2024-11-22T14:49:59.756429",
+    "training_end_time": "2024-11-22T14:50:10.075618",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 16,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 32,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7690,
+    "final_train_accuracy": 0.9451666666666667,
+    "final_test_accuracy": 0.9743,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9451666666666667,
+        "test_accuracy": 0.9743,
+        "train_loss": 0.17153194466722943,
+        "test_loss": 0.08389658965170384
+      }
+    ],
+    "training_time": 10.319189
+  },
+  {
+    "timestamp": "2024-11-22T14:50:10.115013",
+    "training_end_time": "2024-11-22T14:50:20.010269",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 16,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 32,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7690,
+    "final_train_accuracy": 0.9447666666666666,
+    "final_test_accuracy": 0.975,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9447666666666666,
+        "test_accuracy": 0.975,
+        "train_loss": 0.17354575130241567,
+        "test_loss": 0.07719389386475087
+      }
+    ],
+    "training_time": 9.895256
+  },
+  {
+    "timestamp": "2024-11-22T14:50:20.043674",
+    "training_end_time": "2024-11-22T14:50:30.032008",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 16,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 32,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7690,
+    "final_train_accuracy": 0.9544666666666667,
+    "final_test_accuracy": 0.9759,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9544666666666667,
+        "test_accuracy": 0.9759,
+        "train_loss": 0.14311612034137092,
+        "test_loss": 0.08301653116941451
+      }
+    ],
+    "training_time": 9.988334
+  },
+  {
+    "timestamp": "2024-11-22T14:50:30.069035",
+    "training_end_time": "2024-11-22T14:50:40.302180",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 16,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 32,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 7690,
+    "final_train_accuracy": 0.9528833333333333,
+    "final_test_accuracy": 0.9799,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9528833333333333,
+        "test_accuracy": 0.9799,
+        "train_loss": 0.1498388471399575,
+        "test_loss": 0.058505284041166304
+      }
+    ],
+    "training_time": 10.233145
+  },
+  {
+    "timestamp": "2024-11-22T14:53:56.507745",
+    "training_end_time": "2024-11-22T14:54:07.728509",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 24,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 32,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 10074,
+    "final_train_accuracy": 0.9343833333333333,
+    "final_test_accuracy": 0.969,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.9343833333333333,
+        "test_accuracy": 0.969,
+        "train_loss": 0.20673324394502493,
+        "test_loss": 0.09497111216187477
+      }
+    ],
+    "training_time": 11.220764
+  },
+  {
+    "timestamp": "2024-11-22T14:57:52.270199",
+    "training_end_time": "2024-11-22T14:58:00.856219",
+    "architecture": [
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 8,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Convolution 2D",
+        "params": {
+          "filters": 64,
+          "kernelSize": 3,
+          "stride": 1,
+          "padding": 1,
+          "activation": "relu"
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Max Pooling",
+        "params": {
+          "poolSize": 2,
+          "stride": 2
+        }
+      },
+      {
+        "type": "Flatten",
+        "params": {}
+      },
+      {
+        "type": "Fully Connected",
+        "params": {
+          "units": 10,
+          "activation": "softmax"
+        }
+      }
+    ],
+    "optimizer": "adam",
+    "learning_rate": 0.01,
+    "epochs": 1,
+    "total_params": 5402,
+    "final_train_accuracy": 0.8859333333333334,
+    "final_test_accuracy": 0.9277,
+    "training_results": [
+      {
+        "epoch": 0,
+        "train_accuracy": 0.8859333333333334,
+        "test_accuracy": 0.9277,
+        "train_loss": 0.34964920173702974,
+        "test_loss": 0.2234170690178871
+      }
+    ],
+    "training_time": 8.58602
   }
 ]
