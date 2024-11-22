@@ -25,4 +25,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest  backend/tests/ -v  log_cli_level=INFO
+        pytest  backend/tests/ -v  --log-cli-level=INFO
