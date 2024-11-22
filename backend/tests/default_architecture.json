@@ -3,7 +3,7 @@
     {
       "type": "Convolution 2D",
       "params": {
-        "filters": 16,
+        "filters": 8,
         "kernelSize": 3,
         "stride": 1,
         "padding": 1,
@@ -20,7 +20,7 @@
     {
       "type": "Convolution 2D",
       "params": {
-        "filters": 32,
+        "filters": 48,
         "kernelSize": 3,
         "stride": 1,
         "padding": 1,
