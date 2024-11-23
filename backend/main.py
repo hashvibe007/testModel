@@ -389,14 +389,8 @@ def create_dynamic_model(architecture):
         current_channels = 1  # MNIST input channels
         current_height = 28   # MNIST input height
         current_width = 28    # MNIST input width
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-        logger.info(f"Initial dimensions: channels={current_channels}, height={current_height}, width={current_width}")
-
+        
         for layer in architecture:
-            logger.info(f"\nProcessing layer: {layer.type}")
-            logger.info(f"Input dimensions: channels={current_channels}, height={current_height}, width={current_width}")
-
             if layer.type == 'Convolution 2D':
                 conv = nn.Conv2d(
                     in_channels=current_channels,
@@ -415,7 +409,24 @@ def create_dynamic_model(architecture):
                 current_width = ((current_width + 2*layer.params['padding'] - layer.params['kernelSize']) 
                                // layer.params['stride'] + 1)
                 current_channels = layer.params['filters']
-
+            elif layer.type == 'Convolution 1x1':
+                conv = nn.Conv2d(
+                    in_channels=current_channels,
+                    out_channels=layer.params['filters'],
+                    kernel_size=1,
+                    stride=1,
+                    padding=0
+                )
+                layers.append(conv)
+                if layer.params['activation'] == 'relu':
+                    layers.append(nn.ReLU())
+                current_channels = layer.params['filters']
+            elif layer.type == 'Batch Normalization':
+                layers.append(nn.BatchNorm2d(
+                    num_features=current_channels,
+                    momentum=layer.params['momentum'],
+                    eps=layer.params['epsilon']
+                ))
             elif layer.type == 'Max Pooling':
                 layers.append(nn.MaxPool2d(
                     kernel_size=layer.params['poolSize'],
@@ -476,7 +487,7 @@ def create_dynamic_model(architecture):
         logger.info(f"Number of layers: {len(layers)}")
         logger.info(f"Final output shape: ({current_channels}, {current_height}, {current_width})")
         
-        model = nn.Sequential(*layers).to(device)
+        model = nn.Sequential(*layers)
         total_params = sum(p.numel() for p in model.parameters())
         logger.info(f"Total parameters: {total_params}")
         
@@ -642,5 +653,65 @@ async def get_augmented_samples(config: dict):
         return {"images": augmented_images}
     except Exception as e:
         logger.error(f"Error generating augmented samples: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/layer-visualization")
+async def get_layer_visualization(layer_info: dict):
+    try:
+        # Load a sample image from MNIST
+        train_loader, _ = load_data(batch_size=1)
+        sample_image = next(iter(train_loader))[0][0]
+        
+        # Convert dictionaries to LayerConfig objects
+        all_layers = [
+            LayerConfig(**layer) for layer in layer_info['previous_layers']
+        ]
+        current_layer = LayerConfig(**layer_info['layer'])
+        all_layers.append(current_layer)
+        
+        # Create model with all layers
+        partial_model = create_dynamic_model(all_layers)
+        partial_model.eval()
+        
+        with torch.no_grad():
+            # Get the feature maps
+            feature_maps = partial_model(sample_image.unsqueeze(0))
+            
+            # Handle different types of layer outputs
+            if isinstance(feature_maps, torch.Tensor):
+                if len(feature_maps.shape) == 4:  # Conv/Pool layers: [batch, channels, height, width]
+                    feature_maps = feature_maps[0]  # Remove batch dimension
+                elif len(feature_maps.shape) == 2:  # FC layers: [batch, features]
+                    # Reshape to square grid for visualization
+                    size = int(np.ceil(np.sqrt(feature_maps.shape[1])))
+                    padded = torch.zeros(size * size)
+                    padded[:feature_maps.shape[1]] = feature_maps[0]
+                    feature_maps = padded.view(1, size, size)
+            
+            # Convert feature maps to images
+            visualizations = []
+            num_maps = min(9, feature_maps.shape[0] if len(feature_maps.shape) > 2 else 1)
+            
+            for i in range(num_maps):
+                if len(feature_maps.shape) > 2:
+                    feature_map = feature_maps[i].numpy()
+                else:
+                    feature_map = feature_maps.numpy()
+                
+                # Normalize to 0-255 range
+                feature_map = ((feature_map - feature_map.min()) * 255 
+                             / (feature_map.max() - feature_map.min() + 1e-8))
+                
+                # Convert to base64
+                img = Image.fromarray(feature_map.astype('uint8'))
+                buffered = io.BytesIO()
+                img.save(buffered, format="PNG")
+                img_str = base64.b64encode(buffered.getvalue()).decode()
+                visualizations.append(img_str)
+        
+        return {"visualizations": visualizations}
+    except Exception as e:
+        logger.error(f"Error generating layer visualization: {str(e)}")
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))

@@ -8,6 +8,8 @@ const formatArchitecture = (architecture) => {
     switch (layer.type) {
       case 'Convolution 2D':
         return `Conv2D:${layer.params.filters}:${layer.params.activation}`;
+      case 'Convolution 1x1':
+        return `Conv1x1:${layer.params.filters}:${layer.params.activation}`;
       case 'Max Pooling':
         return 'MaxPool';
       case 'Global Average Pooling':
@@ -16,6 +18,8 @@ const formatArchitecture = (architecture) => {
         return 'Flatten';
       case 'Dropout':
         return `Drop:${layer.params.rate}`;
+      case 'Batch Normalization':
+        return 'BatchNorm';
       case 'Fully Connected':
         return `Dense:${layer.params.units}:${layer.params.activation}`;
       default:
@@ -98,6 +102,14 @@ const TrainingHistory = ({ history, onSetDefault }) => {
     return settings.join(', ');
   };
 
+  const isHighPerforming = (entry) => {
+    return (
+      entry.final_train_accuracy >= 0.95 &&
+      entry.final_test_accuracy >= 0.95 &&
+      entry.total_params < 10000
+    );
+  };
+
   return (
     <Paper sx={{ p: 2, maxHeight: '80vh', overflow: 'auto' }}>
       <Typography variant="h6" gutterBottom>
@@ -106,9 +118,36 @@ const TrainingHistory = ({ history, onSetDefault }) => {
       {sortedHistory.map((entry, index) => {
         const isDefault = selectedDefault === JSON.stringify(entry.architecture);
         const augmentationInfo = formatAugmentationInfo(entry.augmentation);
+        const isOptimal = isHighPerforming(entry);
         
         return (
-          <Card key={entry.timestamp} sx={{ mb: 2, p: 1 }}>
+          <Card 
+            key={entry.timestamp} 
+            sx={{ 
+              mb: 2, 
+              p: 1,
+              border: isOptimal ? '2px solid #4caf50' : 'none',
+              backgroundColor: isOptimal ? '#f1f8e9' : 'white',
+              position: 'relative'
+            }}
+          >
+            {isOptimal && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: -10,
+                  right: -10,
+                  backgroundColor: '#4caf50',
+                  color: 'white',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                Optimal
+              </Box>
+            )}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle2" gutterBottom>
                 Model #{sortedHistory.length - index} - {new Date(entry.timestamp).toLocaleString()}
@@ -132,7 +171,13 @@ const TrainingHistory = ({ history, onSetDefault }) => {
               </Button>
             </Box>
             
-            <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <Stack 
+              direction="row" 
+              spacing={1} 
+              sx={{ mb: 1 }}
+              flexWrap="wrap"  // Allow chips to wrap
+              gap={1}  // Add gap between wrapped items
+            >
               <Chip
                 size="small"
                 icon={<Settings />}
@@ -157,9 +202,10 @@ const TrainingHistory = ({ history, onSetDefault }) => {
               <Chip
                 size="small"
                 icon={<Speed />}
-                label={`Batch: ${entry.batch_size}`}  // Show actual batch size
+                label={`Batch: ${entry.batch_size}`}
                 color="primary"
                 variant="outlined"
+                sx={{ minWidth: 'auto' }}  // Allow chip to grow as needed
               />
               {augmentationInfo && (
                 <Chip
@@ -199,11 +245,19 @@ const TrainingHistory = ({ history, onSetDefault }) => {
               gap: 1
             }}>
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography 
+                  variant="body2" 
+                  color={isOptimal ? 'success.main' : 'text.secondary'}
+                  fontWeight={isOptimal ? 'bold' : 'normal'}
+                >
                   Train: {(entry.final_train_accuracy * 100).toFixed(2)}% | 
                   Test: {(entry.final_test_accuracy * 100).toFixed(2)}%
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography 
+                  variant="caption" 
+                  color={isOptimal ? 'success.main' : 'text.secondary'}
+                  fontWeight={isOptimal ? 'bold' : 'normal'}
+                >
                   Params: {entry.total_params.toLocaleString()}
                 </Typography>
               </Box>

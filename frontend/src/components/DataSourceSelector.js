@@ -51,10 +51,10 @@ const DataSourceSelector = ({ selectedSource, onSourceChange }) => {
             <Box>
               <FormControlLabel
                 value={source.id}
-                control={<Radio />}
+                control={<Radio size="small" />}
                 label={
                   <Box>
-                    <Typography variant="body1">
+                    <Typography variant="body2">
                       {source.name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -63,6 +63,7 @@ const DataSourceSelector = ({ selectedSource, onSourceChange }) => {
                   </Box>
                 }
                 disabled={source.disabled}
+                sx={{ mb: 1 }}
               />
             </Box>
           </Tooltip>

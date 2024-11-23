@@ -17,8 +17,8 @@ import ImageAugmentationConfig from './ImageAugmentationConfig';
 
 const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTraining, onTrainingComplete }) => {
   const [optimizer, setOptimizer] = useState('adam');
-  const [learningRate, setLearningRate] = useState(0.001);
-  const [epochs, setEpochs] = useState(10);
+  const [learningRate, setLearningRate] = useState(0.01);
+  const [epochs, setEpochs] = useState(1);
   const [batchSize, setBatchSize] = useState(100);
   const [error, setError] = useState(null);
   const [augmentationConfig, setAugmentationConfig] = useState({
@@ -135,6 +135,7 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
           onChange={(e) => setLearningRate(parseFloat(e.target.value))}
           sx={{ mb: 2 }}
           inputProps={{ min: 0.0001, step: 0.0001 }}
+          helperText="Default: 0.01"
         />
 
         <TextField
@@ -145,6 +146,7 @@ const TrainingConfig = ({ networkLayers, setTrainingResults, isTraining, setIsTr
           onChange={(e) => setEpochs(parseInt(e.target.value))}
           sx={{ mb: 2 }}
           inputProps={{ min: 1 }}
+          helperText="Default: 1"
         />
 
         <TextField

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, Grid } from '@mui/material';
+import { Container, Box, Grid, Paper } from '@mui/material';
 import LayerPalette from './components/LayerPalette';
 import NetworkBuilder from './components/NetworkBuilder';
 import TrainingConfig from './components/TrainingConfig';
 import TrainingResults from './components/TrainingResults';
 import TrainingHistory from './components/TrainingHistory';
-import { getTrainingHistory } from './services/api';
 import DataSourceSelector from './components/DataSourceSelector';
+import { getTrainingHistory } from './services/api';
 import './App.css';
 
 function App() {
@@ -43,6 +43,22 @@ function App() {
         activation: 'relu'
       }
     },
+    conv1x1: {
+      type: 'Convolution 1x1',
+      icon: '🔍',
+      defaultParams: {
+        filters: 32,
+        activation: 'relu'
+      }
+    },
+    batchnorm: {
+      type: 'Batch Normalization',
+      icon: '📊',
+      defaultParams: {
+        momentum: 0.99,
+        epsilon: 0.001
+      }
+    },
     maxpool: {
       type: 'Max Pooling',
       icon: '🔲',
@@ -72,8 +88,8 @@ function App() {
       type: 'Fully Connected',
       icon: '🔌',
       defaultParams: {
-        units: 128,
-        activation: 'relu'
+        units: 10,
+        activation: 'softmax'
       }
     }
   };
@@ -91,27 +107,48 @@ function App() {
         defaultParams: { ...layerTemplate.defaultParams }
       };
       
+      // Validate layer placement
+      const newLayers = [...layers];
+      let canAdd = true;
+      
+      // Check if trying to add Flatten or Global Average Pooling
       if (layerType === 'flatten' || layerType === 'globalavgpool') {
+        // Check if one already exists
         if (layers.some(layer => 
           layer.type === 'Flatten' || layer.type === 'Global Average Pooling'
         )) {
-          return;
+          canAdd = false;
         }
+        
+        // Check if there are conv layers before and no dense layers after
         const hasConvBefore = layers.some(layer => 
-          layer.type === 'Convolution 2D' || layer.type === 'Max Pooling'
+          layer.type === 'Convolution 2D' || 
+          layer.type === 'Convolution 1x1' || 
+          layer.type === 'Max Pooling'
         );
         const hasDenseAfter = layers.some(layer => layer.type === 'Fully Connected');
+        
         if (!hasConvBefore || hasDenseAfter) {
-          return;
+          canAdd = false;
         }
       }
       
-      setLayers([...layers, newLayer]);
+      // Check if trying to add conv/pool after dense
+      if ((layerType === 'conv2d' || layerType === 'conv1x1' || layerType === 'maxpool') && 
+          layers.some(layer => layer.type === 'Fully Connected')) {
+        canAdd = false;
+      }
+      
+      // Add layer if validation passes
+      if (canAdd) {
+        setLayers([...layers, newLayer]);
+      }
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
   };
 
   const handleLayerUpdate = (indexOrNewLayers, params) => {
@@ -136,6 +173,10 @@ function App() {
     switch (layerType) {
       case 'Convolution 2D':
         return 'conv2d';
+      case 'Convolution 1x1':
+        return 'conv1x1';
+      case 'Batch Normalization':
+        return 'batchnorm';
       case 'Max Pooling':
         return 'maxpool';
       case 'Global Average Pooling':
@@ -184,22 +225,36 @@ function App() {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Box sx={{ my: 4 }}>
         <h1>Neural Network Training Dashboard</h1>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={8}>
-            <DataSourceSelector 
-              selectedSource={dataSource}
-              onSourceChange={handleDataSourceChange}
-            />
-            <LayerPalette />
+          {/* Left Sidebar */}
+          <Grid item xs={12} md={3}>
+            <Box sx={{ position: 'sticky', top: 20 }}>
+              <TrainingConfig 
+                networkLayers={layers}
+                setTrainingResults={setTrainingResults}
+                isTraining={isTraining}
+                setIsTraining={setIsTraining}
+                onTrainingComplete={loadTrainingHistory}
+                dataSource={dataSource}
+              />
+              <DataSourceSelector 
+                selectedSource={dataSource}
+                onSourceChange={handleDataSourceChange}
+              />
+            </Box>
+          </Grid>
+
+          {/* Main Content Area */}
+          <Grid item xs={12} md={6}>
             <Box
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               sx={{ 
                 minHeight: '200px',
-                border: '2px dashed #ccc',
+                backgroundColor: '#f8f8f8',
                 borderRadius: '4px',
                 mb: 2,
                 p: 2
@@ -210,26 +265,26 @@ function App() {
                 onLayerUpdate={handleLayerUpdate}
                 onLayerDelete={handleLayerDelete}
                 dataSource={dataSource}
+                layerTypes={layerTypes}
               />
             </Box>
-            <TrainingConfig 
-              networkLayers={layers}
-              setTrainingResults={setTrainingResults}
-              isTraining={isTraining}
-              setIsTraining={setIsTraining}
-              onTrainingComplete={loadTrainingHistory}
-              dataSource={dataSource}
-            />
             <TrainingResults results={trainingResults} />
           </Grid>
-          <Grid item xs={12} md={4}>
-            <TrainingHistory 
-              history={trainingHistory} 
-              onSetDefault={handleSetDefaultArchitecture}
-            />
+
+          {/* Right Sidebar */}
+          <Grid item xs={12} md={3}>
+            <Box sx={{ position: 'sticky', top: 20 }}>
+              <TrainingHistory 
+                history={trainingHistory} 
+                onSetDefault={handleSetDefaultArchitecture}
+              />
+            </Box>
           </Grid>
         </Grid>
       </Box>
+      
+      {/* Floating Layer Palette */}
+      <LayerPalette layerTypes={layerTypes} />
     </Container>
   );
 }
